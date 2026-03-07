@@ -1,5 +1,9 @@
 from flask_restx import Namespace, Resource, fields
-from flask import request
+from ..engine.functions import Hypersphere
+from ..engine.algorithm import GeneticAlgorithm
+from ..operators.selection import BestSelection
+from ..operators.crossover import OnePointCrossover
+from ..operators.mutation import OnePointMutation
 
 algorithm_ns = Namespace("optimizations", description="Genetic algorithm optimization", path="/optimizations")
 
@@ -63,18 +67,45 @@ class OptimizationJob(Resource):
 
     @algorithm_ns.expect(algorithm_params_model, validate=False)
     @algorithm_ns.marshal_with(optimization_result_model, code=200)
-    @algorithm_ns.doc(description="Performs the optimization job based on the provided parameters and returns results.")
+    @algorithm_ns.doc(description="Performs real optimization using the Genetic Engine.")
     def post(self):
-        """Perform optimization job"""
+        """Perform real optimization job"""
         data = algorithm_ns.payload or {}
         params = parse_params(data)
 
+        test_func = Hypersphere()
+
+        if params["selection_method"] == "best":
+            selection = BestSelection()
+
+        crossover = OnePointCrossover()
+
+        mutation = OnePointMutation()
+
+        ga = GeneticAlgorithm(
+            test_function=test_func,
+            population_size=params["population_size"],
+            num_variables=params["num_variables"],
+            precision=params["precision"],
+            epochs=params["epochs"],
+            selection=selection,
+            crossover=crossover,
+            mutation=mutation,
+            crossover_prob=params["crossover_prob"],
+            mutation_prob=params["mutation_prob"],
+            elite_strategy=params["elite_strategy"]
+        )
+
+        execution_results = ga.run()
+        best_individual = execution_results["best"]
+
         return {
             "status": "success",
-            "message": "OK.",
+            "message": f"Optimization finished successfully in {execution_results['time']:.4f} seconds.",
             "received_params": params,
-            "dummy_results": {
-                "best_fitness": 0.001,
-                "best_solution": [0.001, -0.002],
-            },
+            "results": {
+                "best_fitness": best_individual.fitness,
+                "best_decoded_variables": best_individual.get_decoded_values(),
+                "history": execution_results["history"] # Dane do wykresów
+            }
         }, 200
