@@ -2,12 +2,22 @@ import os
 
 from flask import Flask
 
+from flask_restx import Api
+
+from api.algorithm_controller import algorithm_ns
+
 app = Flask(__name__)
 
+api = Api(
+    app,
+    version="1.0",
+    title="OE Optimization API",
+    description="Genetic Algorithm Optimization API",
+    doc="/api/docs",
+    prefix="/api",
+)
 
-@app.route("/")
-def index():
-    return {"message": "Hello from oe-backend!"}
+api.add_namespace(algorithm_ns)
 
 
 if __name__ == "__main__":
