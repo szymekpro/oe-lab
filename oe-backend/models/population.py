@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from .chromosome import Chromosome
 from .individual import Individual
-from ..engine import TestFunction
+from engine.functions import TestFunction
 
 
 class Population:

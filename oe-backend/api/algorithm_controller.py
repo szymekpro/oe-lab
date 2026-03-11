@@ -1,9 +1,9 @@
 from flask_restx import Namespace, Resource, fields
-from ..engine.functions import Hypersphere
-from ..engine.algorithm import GeneticAlgorithm
-from ..operators.selection import BestSelection
-from ..operators.crossover import OnePointCrossover
-from ..operators.mutation import OnePointMutation
+from engine.functions import Hypersphere
+from engine.algorithm import GeneticAlgorithm
+from operators.selection import BestSelection
+from operators.crossover import OnePointCrossover
+from operators.mutation import OnePointMutation
 
 algorithm_ns = Namespace("optimizations", description="Genetic algorithm optimization", path="/optimizations")
 
