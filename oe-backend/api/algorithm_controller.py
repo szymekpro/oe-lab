@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from engine.functions import Hypersphere
 from engine.algorithm import GeneticAlgorithm
-from operators.selection import BestSelection
+from operators.selection import BestSelection, RouletteSelection, TournamentSelection
 from operators.crossover import OnePointCrossover
 from operators.mutation import OnePointMutation
 
@@ -77,6 +77,12 @@ class OptimizationJob(Resource):
 
         if params["selection_method"] == "best":
             selection = BestSelection()
+        elif params["selection_method"] == "tournament":
+            selection = TournamentSelection()
+        elif params["selection_method"] == "roulette":
+            selection = RouletteSelection()
+        else:
+            selection = RouletteSelection() 
 
         crossover = OnePointCrossover()
 
@@ -106,6 +112,6 @@ class OptimizationJob(Resource):
             "results": {
                 "best_fitness": best_individual.fitness,
                 "best_decoded_variables": best_individual.get_decoded_values(),
-                "history": execution_results["history"] # Dane do wykresów
+                "history": execution_results["history"]
             }
         }, 200
