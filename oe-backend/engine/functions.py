@@ -18,7 +18,6 @@ class TestFunction(ABC):
         """
         pass
 
-#TODO TUTAJ JUZ PODJEBALI WIDZE TĄ FUNKCJE, TRZEBA BEDZIE INNA WYBRAĆ
 class Hypersphere(TestFunction):
     """
     Hypersphere (Sphere) test function.

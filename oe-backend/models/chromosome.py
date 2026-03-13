@@ -13,9 +13,12 @@ class Chromosome:
         self.precision = precision
         self.size = self._calculate_size()
 
+        if bits_string is not None and value is not None:
+            raise ValueError("Cannot provide both 'value' and 'bits_string' simultaneously!")
+
         if bits_string is not None:
             if len(bits_string) != self.size:
-                raise ValueError("Provided bits_string has an invalid length!")
+                raise ValueError(f"Provided bits_string has an invalid length! Expected {self.size}.")
             self.bits = bits_string
 
         elif value is not None:
@@ -39,7 +42,7 @@ class Chromosome:
         Encodes a real number into a binary string representation.
         """
         a, b = self.domain
-        decimal_value = int((number - a) / (b - a) * (2 ** self.size - 1))
+        decimal_value = int(round((number - a) / (b - a) * (2 ** self.size - 1)))
         binary_str = bin(decimal_value)[2:]
         return binary_str.zfill(self.size)
 

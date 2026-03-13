@@ -32,10 +32,12 @@ class Population:
     def evaluate(self, test_function: TestFunction):
         """
         Calculates the fitness for each individual using the provided objective function.
+        Only evaluates individuals that haven't been evaluated yet (fitness is None).
         """
         for individual in self.individuals:
-            decoded_vars = individual.get_decoded_values()
-            individual.fitness = test_function.evaluate(decoded_vars)
+            if individual.fitness is None:
+                decoded_vars = individual.get_decoded_values()
+                individual.fitness = test_function.evaluate(decoded_vars)
 
     def get_best_individual(self, is_minimization: bool = True) -> Individual:
         """

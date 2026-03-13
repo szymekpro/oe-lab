@@ -42,7 +42,18 @@ class GeneticAlgorithm:
         for epoch in range(self.epochs):
             self.population.evaluate(self.test_function)
             best_individual = self.population.get_best_individual(is_minimization=self.is_minimization)
-            self.history.append({"epoch": epoch, "best_fitness": best_individual.fitness})
+            
+            fitnesses = [ind.fitness for ind in self.population.individuals if ind.fitness is not None]
+            if fitnesses:
+                best_fit = min(fitnesses) if self.is_minimization else max(fitnesses)
+                worst_fit = max(fitnesses) if self.is_minimization else min(fitnesses)
+                avg_fit = sum(fitnesses) / len(fitnesses)
+                self.history.append({
+                    "epoch": epoch, 
+                    "best_fitness": best_fit,
+                    "average_fitness": avg_fit,
+                    "worst_fitness": worst_fit
+                })
 
             next_generation = []
 
@@ -80,6 +91,16 @@ class GeneticAlgorithm:
             )
 
         self.population.evaluate(self.test_function)
+        
+        fitnesses = [ind.fitness for ind in self.population.individuals if ind.fitness is not None]
+        if fitnesses:
+            self.history.append({
+                "epoch": self.epochs, 
+                "best_fitness": min(fitnesses) if self.is_minimization else max(fitnesses),
+                "average_fitness": sum(fitnesses) / len(fitnesses),
+                "worst_fitness": max(fitnesses) if self.is_minimization else min(fitnesses)
+            })
+
         return {
             "best": self.population.get_best_individual(is_minimization=self.is_minimization),
             "time": time.time() - start_time,

@@ -33,14 +33,19 @@ class OnePointCrossover(CrossoverMethod):
         child1_chroms = []
         child2_chroms = []
 
-        for parent1_chrom, parent2_chrom in zip(parent1.chromosomes, parent2.chromosomes):
-            cut = random.randint(1, parent1_chrom.size - 1)
+        for p1c, p2c in zip(parent1.chromosomes, parent2.chromosomes):
+            if p1c.size < 2:
+                child1_chroms.append(Chromosome(p1c.domain, p1c.precision, bits_string=p1c.bits))
+                child2_chroms.append(Chromosome(p2c.domain, p2c.precision, bits_string=p2c.bits))
+                continue
 
-            new_bits_child1 = parent1_chrom.bits[:cut] + parent2_chrom.bits[cut:]
-            new_bits_child2 = parent2_chrom.bits[:cut] + parent1_chrom.bits[cut:]
+            cut = random.randint(1, p1c.size - 1)
 
-            child1_chroms.append(Chromosome(parent1_chrom.domain, parent1_chrom.precision, bits_string=new_bits_child1))
-            child2_chroms.append(Chromosome(parent1_chrom.domain, parent1_chrom.precision, bits_string=new_bits_child2))
+            new_bits_child1 = p1c.bits[:cut] + p2c.bits[cut:]
+            new_bits_child2 = p2c.bits[:cut] + p1c.bits[cut:]
+
+            child1_chroms.append(Chromosome(p1c.domain, p1c.precision, bits_string=new_bits_child1))
+            child2_chroms.append(Chromosome(p2c.domain, p2c.precision, bits_string=new_bits_child2))
 
         return Individual(parent1.num_variables, child1_chroms), Individual(parent1.num_variables, child2_chroms)
 
