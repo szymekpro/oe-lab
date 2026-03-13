@@ -26,7 +26,7 @@ optimization_result_model = algorithm_ns.model("OptimizationResult", {
     "status": fields.String,
     "message": fields.String,
     "received_params": fields.Raw,
-    "dummy_results": fields.Raw,
+    "results": fields.Raw,
 })
 
 DEFAULTS = {
