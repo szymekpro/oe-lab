@@ -107,7 +107,12 @@ const OptimizationForm: React.FC<OptimizationFormProps> = ({
                         name="crossover_method"
                         defaultValue="one_point"
                         gridSpan={4}
-                        options={[{ value: 'one_point', label: 'One Point' }]}
+                        options={[
+                            { value: 'one_point', label: 'One Point' },
+                            { value: 'two_point', label: 'Two Point' },
+                            { value: 'uniform', label: 'Uniform' },
+                            { value: 'grain', label: 'Grain' }
+                        ]}
                     />
 
                     <CustomTextField
@@ -115,7 +120,11 @@ const OptimizationForm: React.FC<OptimizationFormProps> = ({
                         name="mutation_method"
                         defaultValue="one_point"
                         gridSpan={4}
-                        options={[{ value: 'one_point', label: 'One Point' }]}
+                        options={[
+                            { value: 'one_point', label: 'One Point' },
+                            { value: 'two_point', label: 'Two Point' },
+                            { value: 'edge', label: 'Edge Mutation' }
+                        ]}
                     />
 
                     <CustomTextField
