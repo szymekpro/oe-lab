@@ -110,6 +110,7 @@ class OptimizationJob(Resource):
             "message": f"Optimization finished successfully in {execution_results['time']:.4f} seconds.",
             "received_params": params,
             "results": {
+                "execution_time": execution_results["time"],
                 "best_fitness": best_individual.fitness,
                 "best_decoded_variables": best_individual.get_decoded_values(),
                 "history": execution_results["history"]

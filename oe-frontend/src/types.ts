@@ -13,12 +13,20 @@ export interface AlgorithmParams {
     elite_strategy: boolean;
 }
 
+export interface HistoryPoint {
+    epoch: number;
+    best_fitness: number;
+    average_fitness: number;
+    worst_fitness: number;
+}
+
 export interface OptimizationResult {
     status: string;
     message: string;
     results?: {
+        execution_time?: number;
         best_fitness: number;
         best_decoded_variables: number[];
-        history: any[];
+        history: HistoryPoint[];
     };
 }
