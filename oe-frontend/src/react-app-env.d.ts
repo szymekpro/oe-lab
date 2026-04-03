@@ -4,3 +4,7 @@ declare module '*.svg' {
   export { ReactComponent };
   export default src;
 }
+
+declare module '*.png';
+declare module '*.jpg';
+declare module '*.jpeg';

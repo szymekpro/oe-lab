@@ -1,9 +1,10 @@
 from flask_restx import Namespace, Resource, fields
-from ..engine.functions import Hypersphere
-from ..engine.algorithm import GeneticAlgorithm
-from ..operators.selection import BestSelection
-from ..operators.crossover import OnePointCrossover
-from ..operators.mutation import OnePointMutation
+from engine.functions import Hypersphere
+from engine.algorithm import GeneticAlgorithm
+from operators.selection import BestSelection, RouletteSelection, TournamentSelection
+from operators.crossover import OnePointCrossover, TwoPointCrossover, UniformCrossover, GrainCrossover
+from operators.mutation import OnePointMutation, TwoPointMutation, EdgeMutation
+from operators.inversion import Inversion
 
 algorithm_ns = Namespace("optimizations", description="Genetic algorithm optimization", path="/optimizations")
 
@@ -26,7 +27,7 @@ optimization_result_model = algorithm_ns.model("OptimizationResult", {
     "status": fields.String,
     "message": fields.String,
     "received_params": fields.Raw,
-    "dummy_results": fields.Raw,
+    "results": fields.Raw,
 })
 
 DEFAULTS = {
@@ -77,10 +78,30 @@ class OptimizationJob(Resource):
 
         if params["selection_method"] == "best":
             selection = BestSelection()
+        elif params["selection_method"] == "tournament":
+            selection = TournamentSelection()
+        elif params["selection_method"] == "roulette":
+            selection = RouletteSelection()
+        else:
+            selection = RouletteSelection() 
 
-        crossover = OnePointCrossover()
+        if params["crossover_method"] == "two_point":
+            crossover = TwoPointCrossover()
+        elif params["crossover_method"] == "uniform":
+            crossover = UniformCrossover()
+        elif params["crossover_method"] == "grain":
+            crossover = GrainCrossover()
+        else:
+            crossover = OnePointCrossover()
 
-        mutation = OnePointMutation()
+        if params["mutation_method"] == "two_point":
+            mutation = TwoPointMutation()
+        elif params["mutation_method"] == "edge":
+            mutation = EdgeMutation()
+        else:
+            mutation = OnePointMutation()
+
+        inversion = Inversion()
 
         ga = GeneticAlgorithm(
             test_function=test_func,
@@ -93,6 +114,8 @@ class OptimizationJob(Resource):
             mutation=mutation,
             crossover_prob=params["crossover_prob"],
             mutation_prob=params["mutation_prob"],
+            inversion=inversion,
+            inversion_prob=params["inversion_prob"],
             elite_strategy=params["elite_strategy"]
         )
 
@@ -104,8 +127,9 @@ class OptimizationJob(Resource):
             "message": f"Optimization finished successfully in {execution_results['time']:.4f} seconds.",
             "received_params": params,
             "results": {
+                "execution_time": execution_results["time"],
                 "best_fitness": best_individual.fitness,
                 "best_decoded_variables": best_individual.get_decoded_values(),
-                "history": execution_results["history"] # Dane do wykresów
+                "history": execution_results["history"]
             }
         }, 200
