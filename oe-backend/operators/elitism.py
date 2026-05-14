@@ -12,12 +12,22 @@ class Elitism:
         self.elite_count = elite_count
 
     @staticmethod
-    def _clone_individual(individual: Individual) -> Individual:
-        cloned_chromosomes = [
-            Chromosome(ch.domain, ch.precision, bits_string=ch.bits)
-            for ch in individual.chromosomes
-        ]
-        clone = Individual(individual.num_variables, cloned_chromosomes)
+    def _clone_individual(individual):
+        """Clone either a binary Individual or a real RealIndividual via duck typing."""
+        first_chrom = individual.chromosomes[0]
+        if hasattr(first_chrom, "bits"):
+            cloned_chromosomes = [
+                Chromosome(ch.domain, ch.precision, bits_string=ch.bits)
+                for ch in individual.chromosomes
+            ]
+            clone = Individual(individual.num_variables, cloned_chromosomes)
+        else:
+            from models.real_chromosome import RealChromosome
+            from models.real_individual import RealIndividual
+            cloned_chromosomes = [
+                RealChromosome(ch.domain, ch.value) for ch in individual.chromosomes
+            ]
+            clone = RealIndividual(individual.num_variables, cloned_chromosomes)
         clone.fitness = individual.fitness
         return clone
 
