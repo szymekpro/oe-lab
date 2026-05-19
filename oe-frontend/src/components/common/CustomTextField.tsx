@@ -16,6 +16,7 @@ type CustomTextFieldProps = {
     gridSpan?: number;
     options?: { value: string | number; label: string }[];
     inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+    onChange?: (value: string) => void;
 };
 
 const CustomTextField: React.FC<CustomTextFieldProps> = ({ 
@@ -25,7 +26,8 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
     defaultValue,
     gridSpan = 4, 
     options,
-    inputProps
+    inputProps,
+    onChange,
 }) => {
     return (
         <Box sx={{ gridColumn: { xs: 'span 12', sm: `span ${gridSpan}` } }}>
@@ -38,6 +40,7 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
                         defaultValue={defaultValue ?? options[0].value}
                         label={label}
                         input={<OutlinedInput label={label} />}
+                        onChange={onChange ? (e) => onChange(String(e.target.value)) : undefined}
                     >
                         {options.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
@@ -52,6 +55,7 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
                         defaultValue={defaultValue}
                         label={label}
                         inputProps={inputProps}
+                        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
                     />
                 )}
             </FormControl>

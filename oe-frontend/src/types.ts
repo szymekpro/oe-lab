@@ -1,3 +1,5 @@
+export type RepresentationType = 'binary' | 'real';
+
 export interface AlgorithmParams {
     function_name: string;
     num_variables: number;
@@ -11,6 +13,10 @@ export interface AlgorithmParams {
     mutation_prob: number;
     inversion_prob: number;
     elite_strategy: boolean;
+    representation_type: RepresentationType;
+    alpha: number;
+    beta: number;
+    sigma: number;
 }
 
 export interface HistoryPoint {
