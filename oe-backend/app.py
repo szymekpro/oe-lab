@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_restx import Api
 
 from api.algorithm_controller import algorithm_ns
+from api.pygad_controller import pygad_ns
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +20,7 @@ api = Api(
 )
 
 api.add_namespace(algorithm_ns)
+api.add_namespace(pygad_ns)
 
 
 if __name__ == "__main__":
