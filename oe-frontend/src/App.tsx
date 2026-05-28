@@ -1,16 +1,34 @@
 import { useState, useMemo } from 'react';
-import { Container, Typography, Box, ThemeProvider, createTheme, CssBaseline, IconButton } from '@mui/material';
+import {
+  Container, Typography, Box, ThemeProvider, createTheme, CssBaseline,
+  IconButton, Tabs, Tab, Paper
+} from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import ScienceIcon from '@mui/icons-material/Science';
+import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
+import BiotechIcon from '@mui/icons-material/Biotech';
 import OptimizationForm from './components/OptimizationForm';
 import OptimizationResult from './components/OptimizationResult';
+import PyGADForm from './components/PyGADForm';
+import PyGADResult from './components/PyGADResult';
 import alienImg from './alien.png';
-import { AlgorithmParams, OptimizationResult as OptResultType } from './types';
+import { AlgorithmParams, OptimizationResult as OptResultType, PyGADParams, PyGADResult as PyGADResultType } from './types';
 import './App.css';
 
 function App() {
   const [appMode, setAppMode] = useState<'light' | 'dark' | 'dna'>('light');
+  const [activeTab, setActiveTab] = useState(0);
+
+  // ── Custom GA state (P1/P2)
+  const [result, setResult] = useState<OptResultType | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // ── PyGAD state (P3)
+  const [pygadResult, setPygadResult] = useState<PyGADResultType | null>(null);
+  const [pygadLoading, setPygadLoading] = useState(false);
+  const [pygadError, setPygadError] = useState<string | null>(null);
 
   const theme = useMemo(() => {
     const isDna = appMode === 'dna';
@@ -73,32 +91,43 @@ function App() {
     backgroundSize: '150px 150px',
   } : {};
 
-  const [result, setResult] = useState<OptResultType | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleSubmit = async (formData: AlgorithmParams) => {
     setLoading(true);
     setError(null);
     setResult(null);
-
     try {
       const response = await fetch('http://localhost:5000/api/optimizations/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setResult(data);
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      setResult(await response.json());
     } catch (err: any) {
       setError(err.message || 'An error occurred while connecting to the server.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePyGADSubmit = async (formData: PyGADParams) => {
+    setPygadLoading(true);
+    setPygadError(null);
+    setPygadResult(null);
+    try {
+      const response = await fetch('http://localhost:5000/api/pygad/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      setPygadResult(await response.json());
+    } catch (err: any) {
+      setPygadError(err.message || 'An error occurred while connecting to the server.');
+    } finally {
+      setPygadLoading(false);
     }
   };
 
@@ -107,40 +136,87 @@ function App() {
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', py: 4, ...dnaBgStyle, transition: 'background-color 0.3s' }}>
         <Container maxWidth="md">
+          {/* ── Top bar ── */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <IconButton sx={{ ml: 1 }} onClick={toggleColorMode} color="inherit" title={`Toggle Theme (Current: ${appMode})`}>
+            <IconButton
+              sx={{ ml: 1 }}
+              onClick={toggleColorMode}
+              color="inherit"
+              title={`Toggle Theme (Current: ${appMode})`}
+            >
               {getModeIcon()}
             </IconButton>
           </Box>
+
           <Typography variant="h3" component="h1" align="center" gutterBottom color="primary.main" fontWeight="bold">
             Optimization Panel
           </Typography>
           <Typography variant="subtitle1" align="center" color="text.secondary" paragraph sx={{ mb: 4 }}>
-            Configure Genetic Algorithm parameters
+            Configure and run Genetic Algorithm optimization
           </Typography>
 
           {appMode === 'dna' && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1}}>
-              <img 
-                src={alienImg} 
-                alt="Alien" 
-                style={{ 
-                  maxHeight: '200px', 
-                  borderRadius: '16px',
-                }} 
-              />
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+              <img src={alienImg} alt="Alien" style={{ maxHeight: '200px', borderRadius: '16px' }} />
             </Box>
           )}
 
-          <OptimizationForm 
-            loading={loading} 
-            onSubmit={handleSubmit} 
-          />
+          {/* ── Tab navigation ── */}
+          <Paper elevation={1} sx={{ mb: 3 }}>
+            <Tabs
+              value={activeTab}
+              onChange={(_, v) => setActiveTab(v)}
+              variant="fullWidth"
+              textColor="primary"
+              indicatorColor="primary"
+            >
+              <Tab
+                id="tab-custom-ga"
+                aria-controls="tabpanel-custom-ga"
+                icon={<BiotechIcon />}
+                iconPosition="start"
+                label="Custom GA (P1 / P2)"
+              />
+              <Tab
+                id="tab-pygad"
+                aria-controls="tabpanel-pygad"
+                icon={<PsychologyAltIcon />}
+                iconPosition="start"
+                label="PyGAD (P3)"
+              />
+            </Tabs>
+          </Paper>
 
-          <OptimizationResult 
-            result={result} 
-            error={error} 
-          />
+          {/* ── Custom GA tab ── */}
+          <Box
+            role="tabpanel"
+            id="tabpanel-custom-ga"
+            aria-labelledby="tab-custom-ga"
+            hidden={activeTab !== 0}
+          >
+            {activeTab === 0 && (
+              <>
+                <OptimizationForm loading={loading} onSubmit={handleSubmit} />
+                <OptimizationResult result={result} error={error} />
+              </>
+            )}
+          </Box>
+
+          {/* ── PyGAD tab ── */}
+          <Box
+            role="tabpanel"
+            id="tabpanel-pygad"
+            aria-labelledby="tab-pygad"
+            hidden={activeTab !== 1}
+          >
+            {activeTab === 1 && (
+              <>
+                <PyGADForm loading={pygadLoading} onSubmit={handlePyGADSubmit} />
+                <PyGADResult result={pygadResult} error={pygadError} />
+              </>
+            )}
+          </Box>
+
         </Container>
       </Box>
     </ThemeProvider>
