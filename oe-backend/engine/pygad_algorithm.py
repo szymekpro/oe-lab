@@ -173,11 +173,13 @@ class PyGADAlgorithm:
 
     def _fitness_func(self, ga_instance, solution, solution_idx):
         """
-        PyGAD fitness function (must be maximisation → negate for minimisation).
+        PyGAD maximises fitness. For minimisation, map the objective to a
+        positive, order-preserving value (lower raw → higher fitness); a
+        negated fitness (-raw) would invert roulette-wheel (rws) selection.
         """
         decoded = self._decode(solution)
         raw = self._raw_fitness(decoded)
-        return -raw if self.is_minimization else raw
+        return 1.0 / (1.0 + raw) if self.is_minimization else raw
 
     def _on_generation(self, ga_instance):
         """Called after every generation – collect stats for history chart."""
