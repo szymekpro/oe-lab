@@ -73,3 +73,32 @@ export interface PyGADResult {
         function_name: string;
     };
 }
+
+export interface MealPyParams {
+    function_name: string;
+    num_variables: number;
+    epoch: number;
+    pop_size: number;
+    wf: number;
+    cr: number;
+    strategy: number;
+    is_minimization: boolean;
+    seed: number | null;
+}
+
+export interface MealPyResult {
+    status: string;
+    message: string;
+    received_params?: Record<string, unknown>;
+    results?: {
+        execution_time: number;
+        best_fitness: number;
+        best_decoded_variables: number[];
+        history: HistoryPoint[];
+        domain: [number, number];
+        function_name: string;
+        wf: number;
+        cr: number;
+        strategy: number;
+    };
+}

@@ -8,12 +8,15 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import ScienceIcon from '@mui/icons-material/Science';
 import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
 import BiotechIcon from '@mui/icons-material/Biotech';
+import HubIcon from '@mui/icons-material/Hub';
 import OptimizationForm from './components/OptimizationForm';
 import OptimizationResult from './components/OptimizationResult';
 import PyGADForm from './components/PyGADForm';
 import PyGADResult from './components/PyGADResult';
+import MealPyForm from './components/MealPyForm';
+import MealPyResult from './components/MealPyResult';
 import alienImg from './alien.png';
-import { AlgorithmParams, OptimizationResult as OptResultType, PyGADParams, PyGADResult as PyGADResultType } from './types';
+import { AlgorithmParams, OptimizationResult as OptResultType, PyGADParams, PyGADResult as PyGADResultType, MealPyParams, MealPyResult as MealPyResultType } from './types';
 import './App.css';
 
 function App() {
@@ -29,6 +32,11 @@ function App() {
   const [pygadResult, setPygadResult] = useState<PyGADResultType | null>(null);
   const [pygadLoading, setPygadLoading] = useState(false);
   const [pygadError, setPygadError] = useState<string | null>(null);
+
+  // ── MealPy state (P4)
+  const [mealPyResult, setMealPyResult] = useState<MealPyResultType | null>(null);
+  const [mealPyLoading, setMealPyLoading] = useState(false);
+  const [mealPyError, setMealPyError] = useState<string | null>(null);
 
   const theme = useMemo(() => {
     const isDna = appMode === 'dna';
@@ -112,6 +120,25 @@ function App() {
     }
   };
 
+  const handleMealPySubmit = async (formData: MealPyParams) => {
+    setMealPyLoading(true);
+    setMealPyError(null);
+    setMealPyResult(null);
+    try {
+      const response = await fetch('http://localhost:5000/api/mealpy/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      setMealPyResult(await response.json());
+    } catch (err: any) {
+      setMealPyError(err.message || 'An error occurred while connecting to the server.');
+    } finally {
+      setMealPyLoading(false);
+    }
+  };
+
   const handlePyGADSubmit = async (formData: PyGADParams) => {
     setPygadLoading(true);
     setPygadError(null);
@@ -184,6 +211,13 @@ function App() {
                 iconPosition="start"
                 label="PyGAD (P3)"
               />
+              <Tab
+                id="tab-mealpy"
+                aria-controls="tabpanel-mealpy"
+                icon={<HubIcon />}
+                iconPosition="start"
+                label="MealPy DE (P4)"
+              />
             </Tabs>
           </Paper>
 
@@ -213,6 +247,21 @@ function App() {
               <>
                 <PyGADForm loading={pygadLoading} onSubmit={handlePyGADSubmit} />
                 <PyGADResult result={pygadResult} error={pygadError} />
+              </>
+            )}
+          </Box>
+
+          {/* ── MealPy DE tab ── */}
+          <Box
+            role="tabpanel"
+            id="tabpanel-mealpy"
+            aria-labelledby="tab-mealpy"
+            hidden={activeTab !== 2}
+          >
+            {activeTab === 2 && (
+              <>
+                <MealPyForm loading={mealPyLoading} onSubmit={handleMealPySubmit} />
+                <MealPyResult result={mealPyResult} error={mealPyError} />
               </>
             )}
           </Box>
